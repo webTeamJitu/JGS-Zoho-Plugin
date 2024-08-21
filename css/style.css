@@ -1,0 +1,251 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+*{
+  margin: 0;
+  padding: 0;
+  outline: none;
+  font-family:'ArticulatCF-Normal' !important;
+}
+
+::selection{
+  color: #fff;
+  background: #BE202D;
+}
+header{
+  color:black !important;
+}
+.title{
+  color:black !important;
+}
+
+.elementor-widget-text-editor{
+  color: black !important;
+}
+.appcontainer{
+  width: auto;
+  background: #fff;
+  text-align: center;
+  border-radius: 5px;
+  padding: 50px 35px 10px 35px;
+}
+.appcontainer header{
+  font-size: 35px;
+  font-weight: 600;
+  margin: 0 0 30px 0;
+}
+.appcontainer .form-outer{
+  width: 100%;
+  overflow: hidden;
+}
+.appcontainer .form-outer form{
+  display: flex;
+  width: 400%;
+}
+.form-outer form .page{
+  width: 25%;
+  transition: margin-left 0.3s ease-in-out;
+}
+.form-outer form .page .title{
+  text-align: left;
+  font-size: 25px;
+  font-weight: 500;
+  /* color: white !important; */
+}
+.form-outer form .page .field{
+  /* width: 330p x; */
+  height: 45px;
+  margin: 20px 0 45px 0;
+  display: flex;
+  position: relative;
+}
+form .page .field .label{
+  position: absolute;
+  top: -30px;
+  font-weight: 500;
+}
+form .page .field input{
+  height: 100%;
+  width: 100%;
+  border: 1px solid lightgrey;
+  border-radius: 5px;
+  padding-left: 15px;
+  font-size: 18px;
+}
+form .page .field select{
+  width: 100%;
+  padding-left: 10px;
+  font-size: 17px;
+  font-weight: 500;
+}
+form .page .field button{
+  width: 100%;
+  height: calc(100% + 5px);
+  border: none;
+  background: #BE202D;
+  margin-top: -20px;
+  border-radius: 5px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: 0.5s ease;
+}
+form .page .field button:hover{
+  background: #000;
+}
+form .page .btns button{
+  margin-top: -20px!important;
+}
+form .page .btns button.prev{
+  margin-right: 3px;
+  font-size: 17px;
+}
+form .page .btns button.next{
+  margin-left: 3px;
+}
+.appcontainer .progress-bar{
+  display: flex;
+  margin: 40px 0;
+  user-select: none;
+  background-color: #BE202D;
+  flex-direction: row;
+}
+.appcontainer .progress-bar .step{
+  text-align: center;
+  width: 100%;
+  position: relative;
+}
+.appcontainer .progress-bar .step p{
+  font-weight: 500;
+  font-size: 18px;
+  color: #fff !important;
+  margin-bottom: 8px;
+}
+.progress-bar .step .bullet{
+  height: 25px;
+  width: 25px;
+  border: 2px solid white;
+  display: inline-block;
+  border-radius: 50%;
+  position: relative;
+  transition: 0.2s;
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 25px;
+  background: #BE202D;
+}
+.progress-bar .step .bullet.active{
+  border-color: #fff;
+  background: #fff;
+}
+.progress-bar .step .bullet span{
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.progress-bar .step .bullet.active span{
+  display: none;
+}
+.progress-bar .step .bullet:before,
+.progress-bar .step .bullet:after{
+  position: absolute;
+  content: '';
+  bottom: 11px;
+  height: 3px;
+  width: 457px;
+  background: #BE202D;
+  left: 110%;
+}
+.progress-bar .step .bullet.active:after{
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: animate 0.3s linear forwards;
+}
+@keyframes animate {
+  100%{
+    transform: scaleX(1);
+  }
+}
+.progress-bar .step:last-child .bullet:before,
+.progress-bar .step:last-child .bullet:after{
+  display: none;
+}
+.progress-bar .step p.active{
+  color: #fff;
+  transition: 0.2s linear;
+}
+.progress-bar .step .check{
+  position: absolute;
+  left: 50%;
+  top: 70%;
+  font-size: 15px;
+  transform: translate(-50%, -50%);
+  display: none;
+}
+.progress-bar .step .check.active{
+  display: block;
+  color: #BE202D;
+}
+
+.flexer{
+  display: flex;
+  flex-direction: column;
+  height: auto !important;
+}
+
+.zf-multiAttType{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.zf-radioBtnType{
+  width: 5% !important;
+}
+.audiocontainer{
+  overflow-y: scroll;
+  height: 600px;
+}
+.audiocontainer > .field {
+  flex-direction: column;
+}
+
+.btns{
+  flex-direction: row !important;
+}
+.fa, .far, .fas {
+  font-family: "Font Awesome 5 Free" !important;
+}
+.audio {
+  background-color: #F2F4F8;
+  padding: 30px;
+}
+.audio > li > p {
+  color: #BE202D !important;
+}
+
+.audiolink{
+  margin-top: 50px !important;
+}
+
+.resum{
+  height: auto !important;
+  gap:20px !important;
+  flex-direction: column !important;
+}
+
+.resum input{
+  height: 50px !important;
+}
+
+/* //mobile view */
+@media only screen and (max-width: 768px) {
+  .appcontainer .progress-bar{
+    display: none;
+  }
+  .nice-select.open .list {
+    overflow:scroll;
+  }
+}

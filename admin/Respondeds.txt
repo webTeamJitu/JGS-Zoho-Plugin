@@ -1,0 +1,20 @@
+Array
+(
+    [data] => Array
+        (
+            [0] => Array
+                (
+                    [code] => SUCCESS
+                    [details] => Array
+                        (
+                            [jobid] => 776132000000513859
+                            [ids] => [776132000000693001]
+                        )
+
+                    [message] => Record associated successfully
+                    [status] => success
+                )
+
+        )
+
+)

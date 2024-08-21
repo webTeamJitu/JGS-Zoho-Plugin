@@ -1,0 +1,195 @@
+<?php
+
+/*
+ * Plugin Name: Jitu Global Staffing Application Form
+ * Plugin URI: https://www.zohocrm.com/plugins/Jitu-Global-Staffing-Application-Form
+ * Description: This plugin allows you to create a Jitu Global Staffing Application Form in Zoho CRM.
+ * Author: Jitu
+ * Author URI: https://www.zohocrm.com/plugins/Jitu-Global-Staffing-Application-Form
+ * Version: 1.0.0
+ * Compatible with Zoho CRM versions: 7.0.0
+ * Compatible with PHP versions: 5.2.4
+ */
+
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class JituGlobalStaffing {
+    private $admin;
+    private $db;
+
+    public function __construct() {
+        $this->define_constants();
+        $this->include_files();
+        $this->init_classes();
+        $this->setup_hooks();
+    }
+
+    private function define_constants() {
+        define('JGS_PLUGIN_NAME', 'Jitu Global Staffing Application Form');
+        define('JGS_PLUGIN_VERSION', '1.0.0');
+        define('JGS_PLUGIN_AUTHOR', 'Jitu');
+        define('JGS_PLUGIN_AUTHOR_URI', 'https://www.zohocrm.com/plugins/Jitu-Global-Staffing-Application-Form');
+        define('JGS_PLUGIN_DIR_URL', plugin_dir_url(__FILE__));
+        define('JGS_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
+        define('JGS_PLUGIN_BASENAME', plugin_basename(__FILE__));
+    }
+
+    private function include_files() {
+        include_once(JGS_PLUGIN_DIR_PATH . 'admin/ui/class.dashboard.php');
+        include_once(JGS_PLUGIN_DIR_PATH . 'admin/database/class.init.php');
+        include_once(JGS_PLUGIN_DIR_PATH . 'admin/database/class.data.php');
+//         include_once (JGS_PLUGIN_DIR_PATH . 'admin/database/class.zohoAPIData.php');
+        include_once (JGS_PLUGIN_DIR_PATH . 'admin/zoho/functions.php');
+        include_once (JGS_PLUGIN_DIR_PATH . 'admin/zoho/tokens.php');
+        include_once (JGS_PLUGIN_DIR_PATH. 'admin/zoho/class.zohoCalls.php');
+        include_once (JGS_PLUGIN_DIR_PATH . 'admin/index.php');
+        include_once (JGS_PLUGIN_DIR_PATH . 'form.php');
+    }
+
+    private function init_classes() {
+        if (class_exists('Admin\Zoho\ZohoCalls')){
+            $this->zohoCalls = new \Admin\Zoho\ZohoCalls();
+        }
+        if (class_exists('Admin\UI\Dashboard')) {
+            $this->dashboard = new \Admin\UI\Dashboard();
+        }
+        if (class_exists('Admin\Database\Init')) {
+            $this->db = new \Admin\Database\Init();
+        }
+        if (class_exists('Admin\Database\Data')) {
+            $this->data = new \Admin\Database\Data();
+        }
+        if (class_exists('Admin\Database\ZohoAPIData')) {
+            $this->databaseActions = new \Admin\Database\ZohoAPIData();
+        }
+        if (class_exists('Admin\JGSZoho\Admin')) {
+            $this->admin = new \Admin\JGSZoho\Admin();
+        }
+
+        if(class_exists('Admin\Zoho\WP_Admin_Calls\ZohoData')){
+            $this->zoho = new \Admin\Zoho\WP_Admin_Calls\ZohoData();
+        }
+
+        if(class_exists('Admin\Zoho\Tokens\ZohoTokenRefresher')){
+            $this->tokensRefresh = new \Admin\Zoho\Tokens\ZohoTokenRefresher();
+        }
+
+    }
+
+    private function setup_hooks() {
+        \JituGlobalStaffing\add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
+        \JituGlobalStaffing\add_shortcode('jitu_global_staffing', [$this, 'render_form']);
+        \JituGlobalStaffing\add_filter('cron_schedules', [$this, 'custom_cron_schedules']);
+        \JituGlobalStaffing\add_filter('jgs_change_status_cron_schedules', [$this, 'jgs_change_status_cron_schedules']);
+        \JituGlobalStaffing\add_action('jgs_test_cron_job', [$this, 'run_test_success']);
+        \JituGlobalStaffing\add_action('jgs_change_status_cron', [$this, 'jgs_change_status_cron']);
+        \JituGlobalStaffing\add_action('admin_notices', [$this, 'display_invalid_token_notice']);
+
+        \JituGlobalStaffing\register_activation_hook(__FILE__, [$this, 'activate']);
+        \JituGlobalStaffing\register_deactivation_hook(__FILE__, [$this, 'deactivate']);
+    }
+
+    public function enqueue_assets() {
+        if (\JituGlobalStaffing\is_page('jitu-staffing-job-application-form')) {
+            \JituGlobalStaffing\wp_enqueue_style('zf-css', JGS_PLUGIN_DIR_URL . 'css/style.css', [], JGS_PLUGIN_VERSION);
+            \JituGlobalStaffing\wp_enqueue_script('zf-js', JGS_PLUGIN_DIR_URL . 'js/scripter.js', ['jquery'], JGS_PLUGIN_VERSION, true);
+        }
+    }
+
+    public function render_form($atts, $content = null) {
+        return form();
+    }
+
+    public function custom_cron_schedules($schedules) {
+        $schedules['every_minute'] = [
+            'interval' => 60,
+            'display'  => \JituGlobalStaffing\esc_html__('Every Minute')
+        ];
+        return $schedules;
+    }
+
+    public function jgs_change_status_cron_schedules($schedules) {
+        $schedules['every_hour'] = [
+            'interval' => 3600,
+            'display' => \JituGlobalStaffing\esc_html__('Every Hour')
+        ];
+
+        return $schedules;
+    }
+    public function run_test_success() {
+//        $this->zoho->fetchCandidates();
+//         $this->tokensRefresh->refreshAccessToken();
+//         $this->zohoCalls->zohoChangeStatus();
+
+        $response = $this->zoho->fetchCandidates();
+
+        if (isset($response['code']) && $response['code'] === 'INVALID TOKEN') {
+            \JituGlobalStaffing\update_option('jgs_invalid_oauth_token', true);
+        }else{
+            \JituGlobalStaffing\delete_option('jgs_invalid_oauth_token');
+        }
+    }
+
+    public function jgs_change_status_cron()
+    {
+        $this->zohoCalls->zohoChangeStatus();
+    }
+    public function display_invalid_token_notice() {
+        // Check if the option for invalid token is set
+        if (\JituGlobalStaffing\get_option('jgs_invalid_oauth_token')) {
+            echo '<div class="notice notice-error is-dismissible">
+            <p><strong>Invalid OAuth Token:</strong> The OAuth token used in the Jitu Global Staffing plugin is invalid. Please refresh the token.</p>
+        </div>';
+        }
+    }
+
+    public function activate() {
+        if ($this->db) {
+            $this->db->installDb();
+        }
+        if (!\JituGlobalStaffing\wp_next_scheduled('jgs_test_cron_job')) {
+            \JituGlobalStaffing\wp_schedule_event(time(), 'every_minute', 'jgs_test_cron_job');
+        }
+        if(!\JituGlobalStaffing\wp_next_scheduled('jgs_change_status_cron')){
+            \JituGlobalStaffing\wp_schedule_event(time(), 'every_minute', 'jgs_change_status_cron'); // Schedule it every minute
+        }
+    }
+
+    public function deactivate() {
+        if ($this->db) {
+            $this->db->uninstallDb();
+        }
+        $timestamp = \JituGlobalStaffing\wp_next_scheduled('jgs_test_cron_job');
+        $status_change_timestamp = \JituGlobalStaffing\wp_next_scheduled('jgs_change_status_cron');
+        \JituGlobalStaffing\wp_unschedule_event($timestamp, 'jgs_test_cron_job');
+        \JituGlobalStaffing\wp_unschedule_event($status_change_timestamp, 'jgs_change_status_cron');
+    }
+
+//    public function activate() {
+//        if ($this->db) {
+//            $this->db->installDb();
+//        }
+//        if (!wp_next_scheduled('jgs_test_cron_job')) {
+//            wp_schedule_event(time(), 'every_minute', 'jgs_test_cron_job');
+//        }
+//        if(!wp_next_scheduled('jgs_change_status_cron')){
+//            wp_schedule_event(time(), 'every_hour', 'jgs_change_status_cron');
+//        }
+//    }
+//
+//    public function deactivate() {
+//        if ($this->db) {
+//            $this->db->uninstallDb();
+//        }
+//        $timestamp = wp_next_scheduled('jgs_test_cron_job');
+//        $status_change_timestamp = wp_next_scheduled('jgs_change_status_cron');
+//        wp_unschedule_event($timestamp, 'jgs_test_cron_job');
+////        wp_unschedule_event($status_change_timestamp, 'jgs_change_status_cron');
+//    }
+}
+
+// Initialize the plugin
+new JituGlobalStaffing();
